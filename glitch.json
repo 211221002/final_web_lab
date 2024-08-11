@@ -1,0 +1,4 @@
+{
+    "start": "python3 app.py",
+    "python": "3.8"
+}

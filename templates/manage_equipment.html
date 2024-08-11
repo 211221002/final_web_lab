@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Peralatan</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    {% include 'link.html' %}
+    <link href="static/chat_style.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container-xxl position-relative bg-white d-flex p-0">
+        {% include 'sidebar.html' %}
+        <div class="content">
+            {% include 'navbar.html' %}
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h4>Manajemen Peralatan</h4>
+
+                        <!-- Tabel Peralatan -->
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Nama Peralatan</th>
+                                    <th>Jumlah</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for equipment in equipment_list %}
+                                <tr>
+                                    <td>{{ equipment.name }}</td>
+                                    <td>{{ equipment.quantity }}</td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm" data-toggle="modal"
+                                            data-target="#editModal" data-id="{{ equipment._id }}"
+                                            data-name="{{ equipment.name }}"
+                                            data-quantity="{{ equipment.quantity }}">Edit</button>
+                                        <form method="POST"
+                                            action="{{ url_for('delete_equipment', equipment_id=equipment._id) }}"
+                                            style="display:inline;">
+                                            <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <!-- Form Tambah / Edit Peralatan -->
+                        <h5 id="form-title">Tambah Peralatan Baru</h5>
+                        <form method="POST" action="{{ url_for('manage_equipment') }}">
+                            <input type="hidden" id="equipment_id" name="equipment_id">
+                            <div class="form-group">
+                                <label for="name">Nama Peralatan</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="quantity">Jumlah</label>
+                                <input type="number" class="form-control" id="quantity" name="quantity" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="form-button">Tambah Peralatan</button>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form method="POST" action="{{ url_for('edit_equipment') }}">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editModalLabel">Edit Peralatan</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="edit-id" name="equipment_id">
+                        <div class="form-group">
+                            <label for="edit-name">Nama Peralatan</label>
+                            <input type="text" class="form-control" id="edit-name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-quantity">Jumlah</label>
+                            <input type="number" class="form-control" id="edit-quantity" name="quantity" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                        <button type="submit" class="btn btn-primary">Simpan perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <button type="button" class="btn btn-primary rounded-circle position-fixed"
+        style="bottom: 20px; right: 20px; z-index: 100;" data-toggle="modal" data-target="#chatModal">
+        <i class="fas fa-comment-alt"></i> Chat
+    </button>
+
+    {% include 'footer.html' %}
+    {% include 'chat.html' %}
+    <script src="{{ url_for('static', filename='chat.js') }}"></script> 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+    <script>
+        $('#editModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var id = button.data('id');
+            var name = button.data('name');
+            var quantity = button.data('quantity');
+
+            var modal = $(this);
+            modal.find('.modal-body #edit-id').val(id);
+            modal.find('.modal-body #edit-name').val(name);
+            modal.find('.modal-body #edit-quantity').val(quantity);
+        });
+    </script>
+</body>
+
+</html>

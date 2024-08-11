@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FullCalendar CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    {% include 'link.html' %}
+    <link href="{{ url_for('static', filename='chat_style.css') }}" rel="stylesheet">
+    <style>
+        .clickable-row {
+            cursor: pointer;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 250px;
+            background-color: #f8f9fa;
+            padding-top: 20px;
+            overflow-y: auto;
+        }
+
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+
+        .navbar-toggler {
+            margin-right: 15px;
+        }
+        
+    </style>
+</head>
+
+<body>
+    <div class="container-xxl position-relative bg-white d-flex p-0">
+        <!-- Sidebar -->
+        <div class="sidebar pe-4 pb-3">
+            <nav class="navbar bg-light navbar-light">
+                <a href="{{ url_for('home') }}" class="navbar-brand mx-4 mb-3">
+                    <h3 class="text-primary"><i class="fa fa-hashtag me-2"></i>WEB LAB</h3>
+                </a>
+                <div class="d-flex align-items-center ms-4 mb-4">
+                    <div class="position-relative">
+                        {% if user_data['photo'] %}
+                        <img class="rounded-circle me-lg-2" src="{{ url_for('static', filename=user_data['photo']) }}"
+                            alt="" style="width: 40px; height: 40px;">
+                        {% else %}
+                        <img class="rounded-circle me-lg-2"
+                            src="{{ url_for('static', filename='profile_sementara.png') }}" alt="Default Photo"
+                            style="width: 40px; height: 40px;">
+                        {% endif %}
+                        <div
+                            class="bg-success rounded-circle border border-2 border-white position-absolute end-0 bottom-0 p-1">
+                        </div>
+                    </div>
+                    <div class="ms-3">
+                        <h6 class="mb-0">{{ user_data.name }}</h6>
+                        <span>{{ user_data.role }}</span>
+                    </div>
+                </div>
+                <div class="navbar-nav w-100" style="display: flex; justify-content: center; width: 100%;">
+                    <a href="{{ url_for('home') }}"
+                        class="nav-item nav-link {% if request.endpoint == 'home' %}active{% endif %}"
+                        style="margin: 0 10px;"><i class="fa fa-tachometer-alt me-2"></i>Dashboard</a>
+                    <div class="nav-item dropdown" style="margin: 0 10px;">
+                        <a href="#"
+                            class="nav-link dropdown-toggle {% if request.endpoint in ['newproject', 'myproject', 'progressproject', 'project_details'] %}active{% endif %}"
+                            data-bs-toggle="dropdown"><i class="fa fa-laptop me-2"></i>Penelitian</a>
+                        <div class="dropdown-menu bg-transparent border-0" style="text-align: center;">
+                            {% if user_data.role == "admin" or user_data.role == "peneliti" %}
+                            <a href="{{ url_for('newproject') }}"
+                                class="dropdown-item {% if request.endpoint == 'newproject' %}active{% endif %}">Penelitian
+                                Baru</a>
+                            {% endif %}
+                            <a href="{{ url_for('myproject') }}"
+                                class="dropdown-item {% if request.endpoint == 'myproject' %}active{% endif %}">Penelitianku</a>
+                            <a href="#"
+                                class="dropdown-item {% if request.endpoint == 'project_details' %}active{% endif %}"
+                                id="projectDetailsLink" style="display: none;">Project Details</a>
+                        </div>
+                    </div>
+                    {% if user_data.role != "mahasiswa" %}
+                    <div class="nav-item dropdown" style="margin: 0 10px;">
+                        <a href="#"
+                            class="nav-link dropdown-toggle {% if request.endpoint in ['borrow_equipment_page', 'manage_borrow_requests', 'borrowed_equipment', 'manage_equipment'] %}active{% endif %}"
+                            data-bs-toggle="dropdown"><i class="fa fa-keyboard me-2"></i>Peminjaman</a>
+                        <div class="dropdown-menu bg-transparent border-0" style="text-align: center;">
+                            <a href="{{ url_for('borrow_equipment_page') }}"
+                                class="dropdown-item {% if request.endpoint == 'borrow_equipment_page' %}active{% endif %}">Peminjaman</a>
+                            {% if user_data.role == "admin peralatan" %}
+                            <a href="{{ url_for('manage_borrow_requests') }}"
+                                class="dropdown-item {% if request.endpoint == 'manage_borrow_requests' %}active{% endif %}">Kelola
+                                Permintaan</a>
+                            <a href="{{ url_for('manage_equipment') }}"
+                                class="dropdown-item {% if request.endpoint == 'manage_equipment' %}active{% endif %}">Manajemen
+                                Peralatan</a>
+                            {% endif %}
+                            <a href="{{ url_for('borrowed_equipment') }}"
+                                class="dropdown-item {% if request.endpoint == 'borrowed_equipment' %}active{% endif %}">Peralatan
+                                yang Dipinjam</a>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <a href="{{ url_for('sample') }}"
+                        class="nav-item nav-link {% if request.endpoint == 'sample' %}active{% endif %}"
+                        style="margin: 0 10px;"><i class="fa fa-table me-2"></i>Sample</a>
+                    <a href="{{ url_for('statistik') }}"
+                        class="nav-item nav-link {% if request.endpoint == 'statistik' %}active{% endif %}"
+                        style="margin: 0 10px;"><i class="fa fa-chart-bar me-2"></i>Statistik Lab</a>
+                </div>                
+            </nav>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Navbar -->
+            <nav class="navbar navbar-expand bg-light navbar-light sticky-top px-4 py-0">
+                <a href="home.html" class="navbar-brand d-flex d-lg-none me-4">
+                    <h2 class="text-primary mb-0"><i class="fa fa-hashtag"></i></h2>
+                </a>
+                <a href="#" class="sidebar-toggler flex-shrink-0">
+                    <i class="fa fa-bars"></i>
+                </a>
+                <div class="navbar-nav align-items-center ms-auto">
+                    <!-- Notification Dropdown -->
+                    <div class="nav-item dropdown">
+                        <a href="#" id="notificationDropdown" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                            <i id="notificationBell" class="fa fa-bell"></i>
+                            <span class="d-none d-lg-inline-flex">Notifikasi</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0 notification-dropdown">
+                            <h6 class="dropdown-header">Notifikasi</h6>
+                            <div id="notificationList" class="list-group">
+                                <!-- Notifications will be dynamically inserted here -->
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item text-center">See all notifications</a>
+                        </div>
+                    </div>
+            
+                    <!-- User Profile Dropdown -->
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                            {% if user_data and user_data['photo'] %}
+                            <img class="rounded-circle me-lg-2" src="{{ url_for('static', filename=user_data['photo']) }}" alt=""
+                                style="width: 40px; height: 40px;">
+                            {% else %}
+                            <img class="rounded-circle me-lg-2" src="{{ url_for('static', filename='profile_sementara.png') }}"
+                                alt="Default Photo" style="width: 40px; height: 40px;">
+                            {% endif %}
+                            <span class="d-none d-lg-inline-flex">{{ user_data['name'] }}</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">
+                            <a href="{{ url_for('profile') }}" class="dropdown-item">My Profile</a>
+                            <a href="#" class="dropdown-item">Settings</a>
+                            <a href="{{ url_for('logout') }}" class="dropdown-item">Log Out</a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <div class="container mt-4">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h2 class="text-center">Detail Penelitian</h2>
+                        <!-- Project Information -->
+                        <div class="card mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h4>Informasi Penelitian</h4>
+                                {% if user_data.role == "admin" or user_data.role == "peneliti" %}
+                                {% if project.status_penelitian != "Selesai" %}
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                    data-bs-target="#editProjectModal">Edit</button>
+                                {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <h5>Nama Penelitian: {{ project.project_name }}</h5>
+                                <input type="hidden" name="project_id" value="{{ project._id }}">
+                                <p>Kepala Peneliti: {{ project.project_creator }}</p>
+                                <p>Deskripsi: {{ project.project_description }}</p>
+                                <p>Tujuan: {{ project.goals }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Team Members -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h4>Anggota Team</h4>
+                                {% if user_data.role == "admin" or user_data.role == "peneliti" %}
+                                {% if project.status_penelitian != "Selesai" %}
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                    data-bs-target="#addMemberModal">Tambahkan Anggota</button>
+                                {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-group">
+                                    {% if project.member %}
+                                    {% for member in project.member %}
+                                    <li class="list-group-item">
+                                        {{ member.name }} - {{ member.role }}
+                                    </li>
+                                    {% endfor %}
+                                    {% else %}
+                                    <li class="list-group-item">Tidak ada Anggota Team yang ditemukan.</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <div class="container mt-4">
+                                    <h2>Kemajuan Penelitian</h2>
+                                    <div class="progress">
+                                        <div class="progress-bar" id="progressBar" role="progressbar" style="width: 0%;"
+                                            aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                                    </div>
+                                    <button id="completeButton" class="btn btn-success mt-2"
+                                        style="display: none;">Tandai Sebagai Selesai</button>
+                                    <button id="undoButton" class="btn btn-danger mt-2" style="display: none;">Undo
+                                        Selesai</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Task Assignment -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h4>Penugasan Tugas</h4>
+                                {% if current_user.role == "admin" or current_user.role == "peneliti" %}
+                                {% if project.status_penelitian != "Selesai" %}
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                    data-bs-target="#addTaskModal">Tambahkan Tugas</button>
+                                {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Tugas</th>
+                                            <th>Ditugaskan untuk</th>
+                                            <th>Status</th>
+                                            <th>Deadline</th>
+                                            <th>Upload File</th>
+                                            <th>Lihat File</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for task in project.tasks %}
+                                        <tr>
+                                            <td>{{ task.name }}</td>
+                                            <td>{{ task.assigned_to }}</td>
+                                            <td>
+                                                {% if current_user.role == "admin" %}
+                                                <form
+                                                    action="{{ url_for('update_task_status', project_id=project._id, task_name=task.name) }}"
+                                                    method="post">
+                                                    <select name="new_status" class="form-select"
+                                                        onchange="this.form.submit()">
+                                                        <option value="In Progress" {% if task.status=="In Progress"
+                                                            %}selected{% endif %}>Sedang berlangsung</option>
+                                                        <option value="Selesai" {% if task.status=="Selesai"
+                                                            %}selected{% endif %}>Selesai</option>
+                                                    </select>
+                                                </form>
+                                                {% elif current_user.role == "peneliti" %}
+                                                {% if task.status == "Selesai" %}
+                                                Selesai
+                                                {% else %}
+                                                <form
+                                                    action="{{ url_for('update_task_status', project_id=project._id, task_name=task.name) }}"
+                                                    method="post">
+                                                    <select name="new_status" class="form-select"
+                                                        onchange="this.form.submit()">
+                                                        <option value="In Progress" {% if task.status=="In Progress"
+                                                            %}selected{% endif %}>In Progress</option>
+                                                        <option value="Selesai" {% if task.status=="Selesai"
+                                                            %}selected{% endif %}>Selesai</option>
+                                                    </select>
+                                                </form>
+                                                {% endif %}
+                                                {% else %}
+                                                {{ task.status }}
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ task.deadline }}</td>
+                                            <td>
+                                                {% if current_user.role == "admin" or (current_user.role == "peneliti"
+                                                and task.status != "Selesai") %}
+                                                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                                    data-bs-target="#uploadFileModal{{ loop.index }}"
+                                                    data-task-name="{{ task.name }}">Upload</button>
+
+                                                <!-- Upload File Modal -->
+                                                <div class="modal fade" id="uploadFileModal{{ loop.index }}"
+                                                    tabindex="-1" aria-labelledby="uploadFileModalLabel{{ loop.index }}"
+                                                    aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <form
+                                                            action="{{ url_for('upload_file', project_id=project._id, task_name=task.name) }}"
+                                                            method="post" enctype="multipart/form-data">
+                                                            <input type="hidden" name="task_name"
+                                                                value="{{ task.name }}">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title"
+                                                                        id="uploadFileModalLabel{{ loop.index }}">Upload
+                                                                        File for {{ task.name }}</h5>
+                                                                    <button type="button" class="btn-close"
+                                                                        data-bs-dismiss="modal"
+                                                                        aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <div class="form-group">
+                                                                        <label for="file">Choose file</label>
+                                                                        <input type="file" class="form-control"
+                                                                            id="file" name="file">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary"
+                                                                        data-bs-dismiss="modal">Tutup</button>
+                                                                    <button type="submit"
+                                                                        class="btn btn-primary">Upload</button>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                                {% else %}
+                                                <span>Upload disabled</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if task.file %}
+                                                <a href="{{ url_for('view_file', filename=task.file.split('/')[-1]) }}"
+                                                    class="btn btn-success" target="_blank">View File</a>
+                                                {% else %}
+                                                <span>No file uploaded</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if current_user.role == "admin" or (current_user.role == "peneliti"
+                                                and task.status != "Selesai") %}
+                                                <!-- Edit Button -->
+                                                <button type="button" class="btn btn-warning" data-bs-toggle="modal"
+                                                    data-bs-target="#editTaskModal{{ loop.index }}">Edit</button>
+                                                <!-- Delete Button -->
+                                                <form
+                                                    action="{{ url_for('delete_task', project_id=project._id, task_name=task.name) }}"
+                                                    method="post" style="display: inline-block;">
+                                                    <button type="submit" class="btn btn-danger"
+                                                        onclick="return confirm('Are you sure you want to delete this task?')">Delete</button>
+                                                </form>
+
+                                                <!-- Edit Task Modal -->
+                                                <div class="modal fade" id="editTaskModal{{ loop.index }}" tabindex="-1"
+                                                    aria-labelledby="editTaskModalLabel{{ loop.index }}"
+                                                    aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <form
+                                                            action="{{ url_for('edit_task', project_id=project._id, task_name=task.name) }}"
+                                                            method="post">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title"
+                                                                        id="editTaskModalLabel{{ loop.index }}">Edit
+                                                                        Tugas</h5>
+                                                                    <button type="button" class="btn-close"
+                                                                        data-bs-dismiss="modal"
+                                                                        aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <div class="form-group">
+                                                                        <label for="taskName">Tugas</label>
+                                                                        <input type="text" class="form-control"
+                                                                            id="taskName" name="task_name"
+                                                                            value="{{ task.name }}" required>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <label for="assignedTo">Ditugaskan untuk</label>
+                                                                        <select class="form-select" id="assignedTo"
+                                                                            name="assigned_to" required>
+                                                                            {% for member in project.member %}
+                                                                            <option value="{{ member.name }}" {% if
+                                                                                task.assigned_to==member.name
+                                                                                %}selected{% endif %}>{{ member.name }}
+                                                                            </option>
+                                                                            {% endfor %}
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <label for="deadline">Deadline</label>
+                                                                        <input type="date" class="form-control"
+                                                                            id="deadline" name="deadline" value=""
+                                                                            required>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary"
+                                                                        data-bs-dismiss="modal">Tutup</button>
+                                                                    <button type="submit" class="btn btn-primary">Simpan
+                                                                        Perubahan</button>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                                {% else %}
+                                                <span>Actions disabled</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Scheduling -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h4>Schedule</h4>
+                                {% if user_data.role == "admin" or user_data.role == "peneliti" %}
+                                {% if project.status_penelitian != "Selesai" %}
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                    data-bs-target="#addScheduleModal">Tambahkan Schedule</button>
+                                {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <div id="calendar"></div>
+                            </div>
+                        </div>
+
+                        <!-- Add Schedule Modal -->
+                        <div class="modal fade" id="addScheduleModal" tabindex="-1"
+                            aria-labelledby="addScheduleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <form id="addScheduleForm">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="addScheduleModalLabel">Tambahkan Schedule</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input type="hidden" name="project_id" value="{{ project._id }}">
+                                            <div class="form-group">
+                                                <label for="scheduleActivityName">Nama Aktivitas</label>
+                                                <select class="form-control" id="scheduleActivityName"
+                                                    name="schedule_activity_name">
+                                                    <option value="">Pilih aktivitas</option>
+                                                    {% for task in project.tasks %}
+                                                    <option value="{{ task.name }}"
+                                                        data-assigned-to="{{ task.assigned_to }}">{{ task.name }}
+                                                    </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="scheduleAssignedTo">Ditugaskan untuk</label>
+                                                <input type="text" class="form-control" id="scheduleAssignedTo"
+                                                    name="schedule_assigned_to" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="scheduleStartDate">Mulai tanggal</label>
+                                                <input type="date" class="form-control" id="scheduleStartDate"
+                                                    name="schedule_start_date">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="scheduleEndDate">Tanggal Berakhir</label>
+                                                <input type="date" class="form-control" id="scheduleEndDate"
+                                                    name="schedule_end_date">
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Tutup</button>
+                                            <button type="submit" class="btn btn-primary">Tambahkan Schedule</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Project Modal -->
+            <div class="modal fade" id="editProjectModal" tabindex="-1" aria-labelledby="editProjectModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <form id="editProjectForm">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editProjectModalLabel">Edit Project Information</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <input type="hidden" name="project_id" value="{{ project._id }}">
+                                <div class="form-group">
+                                    <label for="editProjectName">Nama Penelitian</label>
+                                    <input type="text" class="form-control" id="editProjectName" name="project_name"
+                                        value="{{ project.project_name }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="editProjectCreator">Kepala Peneliti</label>
+                                    <input type="text" class="form-control" id="editProjectCreator"
+                                        name="project_creator" value="{{ project.project_creator }}" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editProjectDescription">Deskripsi</label>
+                                    <textarea class="form-control" id="editProjectDescription"
+                                        name="project_description" rows="3">{{ project.project_description }}</textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editProjectGoals">Tujuan</label>
+                                    <textarea class="form-control" id="editProjectGoals" name="project_goals"
+                                        rows="3">{{ project.goals }}</textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Save changes</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Member Modal -->
+    <div class="modal fade" id="addMemberModal" tabindex="-1" aria-labelledby="addMemberModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="addMemberForm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addMemberModalLabel">Tambahkan Anggota Team</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <input type="hidden" id="projectIdInput" name="project_id" value="{{ project._id }}">
+                            <label for="memberName">Nama</label>
+                            <select class="form-control" id="memberName" name="member_name">
+                                {% for user in users %}
+                                <option value="{{ user.name }}" data-email="{{ user.email }}">{{ user.name
+                                    }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <input type="hidden" id="memberEmail" name="member_email" value="">
+                        </div>
+                        <div class="form-group">
+                            <label for="memberRole">Peran</label>
+                            <select class="form-control" id="memberRole" name="member_role">
+                                <option value="Asisten Peneliti">Asisten Peneliti</option>
+                                <option value="Koordinator Penelitian">Koordinator Penelitian</option>
+                                <option value="Intern Penelitian">Intern Penelitian</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Add Member</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Task Modal -->
+    <div class="modal fade" id="addTaskModal" tabindex="-1" aria-labelledby="addTaskModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form action="{{ url_for('add_task') }}" method="post">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addTaskModalLabel">Tambahan Tugas</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="project_id" value="{{ project._id }}">
+                        <div class="form-group">
+                            <label for="taskName">Nama Tugas</label>
+                            <input type="text" class="form-control" id="taskName" name="task_name">
+                        </div>
+                        <div class="form-group">
+                            <label for="taskAssignee">Ditugaskan kepada</label>
+                            <select class="form-control" id="taskAssignee" name="task_assignee">
+                                {% for member in project.member %}
+                                <option value="{{ member.name }}">{{ member.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="taskStatus">Status</label>
+                            <select class="form-control" id="taskStatus" name="task_status">
+                                <option>Belum mulai</option>
+                                <option>Sedang berlangsung</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Tambahkan Tugas</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Schedule Modal -->
+    <div class="modal fade" id="addScheduleModal" tabindex="-1" aria-labelledby="addScheduleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="addScheduleForm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addScheduleModalLabel">Tambahkan Schedule</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="project_id" value="{{ project._id }}">
+                        <div class="form-group">
+                            <label for="scheduleActivityName">Nama Aktivitas</label>
+                            <select class="form-control" id="scheduleActivityName" name="schedule_activity_name">
+                                <option value="">Pilih aktivitas</option>
+                                {% for task in project.tasks %}
+                                <option value="{{ task.name }}" data-assigned-to="{{ task.assigned_to }}">{{
+                                    task.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="scheduleAssignedTo">Ditugaskan untuk</label>
+                            <input type="text" class="form-control" id="scheduleAssignedTo" name="schedule_assigned_to"
+                                readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="scheduleStartDate">Mulai tanggal</label>
+                            <input type="date" class="form-control" id="scheduleStartDate" name="schedule_start_date">
+                        </div>
+                        <div class="form-group">
+                            <label for="scheduleEndDate">Tanggal Berakhir</label>
+                            <input type="date" class="form-control" id="scheduleEndDate" name="schedule_end_date">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                        <button type="submit" class="btn btn-primary">Tambahkan Schedule</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    </div>
+
+    <!-- FullCalendar -->
+    <div id="calendar"></div>
+    <button type="button" class="btn btn-primary rounded-circle position-fixed"
+        style="bottom: 20px; right: 20px; z-index: 100;" data-toggle="modal" data-target="#chatModal">
+        <i class="fas fa-comment-alt"></i> Chat
+    </button>
+    {% include 'footer.html' %}
+    {% include 'chat.html' %}
+
+    <script src="{{ url_for('static', filename='chat.js') }}"></script>
+    <script src="{{ url_for('static', filename='notif.js') }}"></script>
+
+    <!-- Bootstrap and FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
+    <script src="{{ url_for('static', filename='chat_script.js') }}"></script>
+
+    <script>
+        document.getElementById('memberName').addEventListener('change', function () {
+            var selectedOption = this.options[this.selectedIndex];
+            var memberEmail = selectedOption.getAttribute('data-email');
+            document.getElementById("memberEmail").value = memberEmail;
+        });
+
+        document.getElementById('addMemberForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+
+            fetch('/send_member_email', {
+                method: 'POST',
+                body: JSON.stringify(Object.fromEntries(formData)),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    $('#addMemberModal').modal('hide');
+                })
+                .catch(error => console.error('Error:', error));
+        });
+
+        $(document).ready(function () {
+            $('#calendar').fullCalendar({
+                events: [
+                    {% for schedule in project.schedules %}
+                    {
+                    title: '{{ schedule.activity_name }}',
+                    start: '{{ schedule.start_date }}',
+                    end: '{{ schedule.end_date }}'
+                },
+                {% endfor %}
+                ]
+            });
+
+        $('#scheduleActivityName').on('change', function () {
+            var selectedOption = $(this).find('option:selected');
+            var assignedTo = selectedOption.data('assigned-to');
+            $('#scheduleAssignedTo').val(assignedTo);
+        });
+
+        $('#addScheduleForm').on('submit', function (event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const projectId = formData.get('project_id');
+
+            fetch(`/add_schedule/${projectId}`, {
+                method: 'POST',
+                body: JSON.stringify(Object.fromEntries(formData.entries())),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.schedule) {
+                        $('#calendar').fullCalendar('renderEvent', {
+                            title: data.schedule.activity_name,
+                            start: data.schedule.start_date,
+                            end: data.schedule.end_date,
+                            allDay: true
+                        }, true);
+                        $('#addScheduleModal').modal('hide');
+                        // Reload the page after the modal is hidden
+                        $('#addScheduleModal').on('hidden.bs.modal', function () {
+                            location.reload();
+                        });
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+        });
+
+        document.getElementById('editProjectForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const projectId = formData.get('project_id');
+
+            fetch(`/edit_project/${projectId}`, {
+                method: 'POST',
+                body: JSON.stringify(Object.fromEntries(formData)),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.message === 'Project updated successfully') {
+                        // Update the project information on the page without reloading
+                        document.querySelector('h5').textContent = 'Project Name: ' + formData.get('project_name');
+                        document.querySelector('p:nth-of-type(1)').textContent = 'Head Researcher: ' + formData.get('project_creator');
+                        document.querySelector('p:nth-of-type(2)').textContent = 'Description: ' + formData.get('project_description');
+                        document.querySelector('p:nth-of-type(3)').textContent = 'Goals: ' + formData.get('project_goals');
+                        $('#editProjectModal').modal('hide');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Assuming user_data.role is available in JavaScript
+            const userRole = "{{ user_data.role }}";
+            const projectDetailsLink = document.getElementById('projectDetailsLink');
+
+            if (userRole === 'admin' || userRole === 'peneliti') {
+                projectDetailsLink.style.display = 'block';
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const projectId = "{{ project._id }}";
+            const userRole = "{{ current_user.role }}"; // Use current_user.role from Flask
+            const statusPenelitian = "{{ status_penelitian }}"; // Use status_penelitian from Flask
+
+            fetch(`/project/${projectId}/progress`)
+                .then(response => response.json())
+                .then(data => {
+                    const progress = data.progress;
+                    const progressBar = document.getElementById('progressBar');
+                    const completeButton = document.getElementById('completeButton');
+                    const undoButton = document.getElementById('undoButton');
+                    progressBar.style.width = progress + '%';
+                    progressBar.setAttribute('aria-valuenow', progress);
+                    progressBar.textContent = progress.toFixed(2) + '%';
+
+                    if (progress === 100) {
+                        if (statusPenelitian !== 'Selesai') {
+                            completeButton.style.display = 'block';
+                            completeButton.addEventListener('click', function () {
+                                fetch(`/project/${projectId}/complete`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({ status_penelitian: 'Selesai' })
+                                })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        alert(data.message);
+                                        location.reload(); // Reload the page
+                                    })
+                                    .catch(error => console.error('Error marking project as complete:', error));
+                            });
+                        }
+                    }
+
+                    // Only show Undo button if status_penelitian is 'Selesai' and userRole is 'admin'
+                    if (userRole === 'admin' && statusPenelitian === 'Selesai') {
+                        undoButton.style.display = 'block';
+                    }
+
+                    // Add event listener for Undo button (only for admin)
+                    if (userRole === 'admin') {
+                        undoButton.addEventListener('click', function () {
+                            fetch(`/project/${projectId}/complete`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ status_penelitian: 'Dalam Perkembangannya' })
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    alert(data.message);
+                                    location.reload(); // Reload the page
+                                })
+                                .catch(error => console.error('Error undoing project completion:', error));
+                        });
+                    }
+                })
+                .catch(error => console.error('Error fetching progress:', error));
+        });
+    </script>
+</body>
+
+</html>

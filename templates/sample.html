@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halaman Sample</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    {% include 'link.html' %}
+    <link href="static/chat_style.css" rel="stylesheet">
+    <style>
+        /* Style untuk tombol sortir */
+        .sort-btn {
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-xxl position-relative bg-white d-flex p-0">
+        {% include 'sidebar.html' %}
+        <div class="content">
+            {% include 'navbar.html' %}
+            <div class="container mt-5">
+                <h2>Halaman Sample</h2>
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Cari..."
+                        onkeyup="searchTable()">
+                </div>
+                <table class="table" id="sampleTable">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="sort-btn" onclick="sortTable(0)">Nama Sampel</th>
+                            <th scope="col" class="sort-btn" onclick="sortTable(1)">Uploader</th>
+                            <th scope="col" class="sort-btn" onclick="sortTable(2)">Nama Proyek</th>
+                            <th scope="col" class="sort-btn" onclick="sortTable(3)">Tanggal Upload</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sample in data_sample %}
+                        <tr>
+                            <td>{{ sample["task_name"] }}</td>
+                            <td>{{ sample["uploader"] }}</td>
+                            <td>{{ sample.get("project_name", "") }}</td>
+                            <td>{{ sample["uploaded_at"].strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <a href="{{ url_for('view_sample', file_path=sample['file_path'].replace('static/', '')) }}"
+                                    class="btn btn-primary" target="_blank">View</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <button type="button" class="btn btn-primary rounded-circle position-fixed"
+        style="bottom: 20px; right: 20px; z-index: 100;" data-toggle="modal" data-target="#chatModal">
+        <i class="fas fa-comment-alt"></i> Chat
+    </button>
+    {% include 'chat.html' %}
+
+    <script src="{{ url_for('static', filename='chat.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="static/main.js"></script>
+    <script>
+        function searchTable() {
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("searchInput");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("sampleTable");
+            tr = table.getElementsByTagName("tr");
+
+            for (i = 0; i < tr.length; i++) {
+                var matchFound = false;
+                td = tr[i].getElementsByTagName("td");
+                for (var j = 0; j < td.length; j++) {
+                    var cell = td[j];
+                    if (cell) {
+                        txtValue = cell.textContent || cell.innerText;
+                        if (j === 3) { // Pencarian berdasarkan kolom tanggal upload
+                            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                                matchFound = true;
+                                break;
+                            }
+                        } else {
+                            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                                matchFound = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (matchFound) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+
+        function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("sampleTable");
+            switching = true;
+            dir = "asc";
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+                    if (dir == "asc") {
+                        if (n === 3) { // Kolom Tanggal Upload
+                            if (new Date(x.innerHTML) > new Date(y.innerHTML)) {
+                                shouldSwitch = true;
+                                break;
+                            }
+                        } else {
+                            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                                shouldSwitch = true;
+                                break;
+                            }
+                        }
+                    } else if (dir == "desc") {
+                        if (n === 3) { // Kolom Tanggal Upload
+                            if (new Date(x.innerHTML) < new Date(y.innerHTML)) {
+                                shouldSwitch = true;
+                                break;
+                            }
+                        } else {
+                            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                                shouldSwitch = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount++;
+                } else {
+                    if (switchcount === 0 && dir === "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+
+        function redirectToInputSample() {
+            window.location.href = "/input_sample";
+        }
+    </script>
+
+</body>
+
+</html>

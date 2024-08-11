@@ -1,0 +1,65 @@
+<!-- Modal Chat -->
+<div class="modal fade" id="chatModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Chat Group</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group chat-item">
+                    <!-- project will be dynamically added here -->
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chat Room Modal -->
+<div class="modal fade" id="chatRoomModal" tabindex="-1" role="dialog" aria-labelledby="chatRoomModalLabel" aria-hidden="true" data-project-id="">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="chatRoomModalLabel">Chat Room</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body chat-modal-body">
+                <!-- Chat Messages -->
+                <div class="chat-box mb-3">
+                    <ul class="list-group list-group-flush" id="chatMessages">
+                        <!-- Chat messages will be dynamically added here -->
+                    </ul>
+                </div>
+                <!-- Message and File Upload Inputs -->
+                <div class="input-group-wrapper">
+                    <div class="form-group mb-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="chatInput" placeholder="Type a message">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="button" id="sendMessageButton">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="file-upload-wrapper d-flex align-items-center mb-3">
+                        <div class="form-group mb-0 mr-2 flex-grow-1">
+                            <input type="file" class="form-control-file" id="chatFileInput">
+                        </div>
+                        <div class="form-group mb-0">
+                            <button class="btn btn-secondary" type="button" id="sendFileButton">Send File</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

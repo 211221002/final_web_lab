@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="img/favicon.ico" rel="icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="static/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="static/style.css" rel="stylesheet">
+    <link href="static/chat_style.css" rel="stylesheet">
+</head>
+
+<body data-username="{{ user_data.username }}">
+    <div class="container-xxl position-relative bg-white d-flex p-0">
+        <div id="spinner"
+            class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+        {% include 'sidebar.html' %}
+        <div class="content">
+            {% include 'navbar.html' %}
+            <div class="container mt-5 text-center">
+                <h2>Selamat Datang, {{ user_data.name }}!</h2>
+
+                {% if projects_data %}
+                <div class="container-fluid pt-4 px-4">
+                    <div class="bg-light text-center rounded p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-4">
+                            <h6 class="mb-0">List Penelitian</h6>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table text-start align-middle table-bordered table-hover mb-0">
+                                <thead>
+                                    <tr class="text-dark">
+                                        <th scope="col">#</th>
+                                        <th scope="col">Nama Penelitian</th>
+                                        <th scope="col">Kepala Peneliti</th>
+                                        <th scope="col">Status</th>
+                                        {% if user_data.role == "admin" %}
+                                        <th scope="col">Actions</th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody id="projectTableBody">
+                                    {% for project in projects_data %}
+                                    <tr class="clickable-row" data-toggle="modal" data-target="#projectDetailModal"
+                                        data-name="{{ project.project_name }}"
+                                        data-creator="{{ project.project_creator }}"
+                                        data-description="{{ project.project_description }}"
+                                        data-status="{{ project.status_penelitian }}"
+                                        data-email="{{ project.email_creator }}">
+                                        <th scope="row">{{ loop.index }}</th>
+                                        <td>{{ project.project_name }}</td>
+                                        <td>{{ project.project_creator }}</td>
+                                        <td>{{ project.status_penelitian }}</td>
+                                        {% if user_data.role == "admin" %}
+                                        <td>
+                                            <button class="btn btn-danger btn-sm"
+                                                onclick="deleteProject('{{ project.project_name }}')">Hapus</button>
+                                        </td>
+                                        {% endif %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination justify-content-center" id="pagination">
+                            <li class="page-item disabled" id="prevPage"><a class="page-link" href="#"
+                                    tabindex="-1">Previous</a></li>
+                            <!-- Page numbers will be dynamically added here -->
+                            <li class="page-item" id="nextPage"><a class="page-link" href="#">Next</a></li>
+                        </ul>
+                    </nav>
+                    <button type="button" class="btn btn-primary rounded-circle position-fixed"
+                        style="bottom: 20px; right: 20px; z-index: 100;" data-toggle="modal" data-target="#chatModal">
+                        <i class="fas fa-comment-alt"></i> Chat
+                    </button>
+                </div>
+                {% else %}
+                <p>Saat ini sedang tidak ada project yang berlangsung.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% include 'footer.html' %}
+    </div>
+
+    <!-- Project Detail Modal -->
+    <div class="modal fade" id="projectDetailModal" tabindex="-1" role="dialog"
+        aria-labelledby="projectDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="projectDetailModalLabel">Project Details</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Project Name:</strong> <span id="modalProjectName"></span></p>
+                    <p><strong>Head Researcher:</strong> <span id="modalProjectCreator"></span></p>
+                    <p><strong>Description:</strong> <span id="modalProjectDescription"></span></p>
+                    <button type="button" class="btn btn-primary" id="joinButton"
+                        onclick="openJoinModal()">Join</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Join Modal -->
+    <div class="modal fade" id="joinModal" tabindex="-1" role="dialog" aria-labelledby="joinModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="joinModalLabel">Join a Project: <span
+                            id="modalProjectNameDisplay"></span></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" style="max-height: 400px; overflow-y: auto;">
+                    <form id="joinForm" onsubmit="sendJoinRequest(event)">
+                        <div class="form-group">
+                            <label for="namaLengkap">Nama Lengkap</label>
+                            <input type="text" class="form-control" id="namaLengkap" name="namaLengkap"
+                                value="{{ user_data['name'] }}" placeholder="{{ user_data['name'] }}" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="alamatEmail">Alamat Email</label>
+                            <input type="email" class="form-control" id="alamatEmail" name="alamatEmail"
+                                value="{{ user_data['email'] }}" placeholder="{{ user_data['email'] }}" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="posisi">Posisi</label>
+                            <select class="form-select" id="posisi" name="posisi" required>
+                                <option value="" disabled selected>Pilih Posisi</option>
+                                <option value="Asisten Peneliti">Asisten Peneliti</option>
+                                <option value="Koordinator Penelitian">Koordinator Penelitian</option>
+                                <option value="Intern Penelitian">Intern Penelitian</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="pesanKhusus">Pesan Khusus</label>
+                            <textarea class="form-control" id="pesanKhusus" name="pesanKhusus" rows="3"></textarea>
+                        </div>
+                        <!-- Hidden inputs for project name and creator's email -->
+                        <input type="hidden" id="creatorEmail" name="creatorEmail">
+                        <input type="hidden" id="projectName" name="projectName">
+                        <button type="submit" class="btn btn-primary">Kirim</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {% include 'chat.html' %}
+    <!-- Di bagian bawah template Anda -->
+    <script src="{{ url_for('static', filename='notif.js') }}"></script>
+    <script src="{{ url_for('static', filename='chat.js') }}"></script>
+    <script src="{{ url_for('static', filename='home.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="static/main.js"></script>
+    <script>
+        function openJoinModal() {
+            // Hide the project detail modal
+            $('#projectDetailModal').modal('hide');
+            // Show the join modal
+            $('#joinModal').modal('show');
+        }
+    </script>
+</body>
+
+</html>

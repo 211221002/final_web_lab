@@ -1,0 +1,14 @@
+{
+    "editor.fontSize": 14,
+    "terminal.integrated.profiles.windows": {
+        "PowerShell": {
+            "source": "PowerShell",
+            "icon": "terminal-powershell",
+            "args": [
+                "-ExecutionPolicy",
+                "bypass"
+            ]
+        },
+    },
+    "terminal.integrated.defaultProfile.windows": "PowerShell"
+}

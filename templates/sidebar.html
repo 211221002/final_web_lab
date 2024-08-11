@@ -1,0 +1,73 @@
+<div class="sidebar pe-4 pb-3">
+    <nav class="navbar bg-light navbar-light">
+        <a href="{{ url_for('home') }}" class="navbar-brand mx-4 mb-3">
+            <h3 class="text-primary"><i class="fa fa-hashtag me-2"></i>WEB LAB</h3>
+        </a>
+        <div class="d-flex align-items-center ms-4 mb-4">
+            <div class="position-relative">
+                {% if user_data['photo'] %}
+                <img class="rounded-circle me-lg-2" src="{{ url_for('static', filename=user_data['photo']) }}" alt=""
+                    style="width: 40px; height: 40px;">
+                {% else %}
+                <img class="rounded-circle me-lg-2" src="{{ url_for('static', filename='profile_sementara.png') }}"
+                    alt="Default Photo" style="width: 40px; height: 40px;">
+                {% endif %}
+                <div class="bg-success rounded-circle border border-2 border-white position-absolute end-0 bottom-0 p-1">
+                </div>
+            </div>
+            <div class="ms-3">
+                <h6 class="mb-0">{{ user_data.name }}</h6>
+                <span>{{ user_data.role }}</span>
+            </div>
+        </div>
+        <div class="navbar-nav w-100">
+            <a href="{{ url_for('home') }}"
+                class="nav-item nav-link {% if request.endpoint == 'home' %}active{% endif %}"><i
+                    class="fa fa-tachometer-alt me-2"></i>Dashboard</a>
+            <div class="nav-item dropdown">
+                <a href="#"
+                    class="nav-link dropdown-toggle {% if request.endpoint in ['newproject', 'myproject', 'progressproject', 'project_details'] %}active{% endif %}"
+                    data-bs-toggle="dropdown"><i class="fa fa-laptop me-2"></i>Penelitian</a>
+                <div class="dropdown-menu bg-transparent border-0">
+                    {% if user_data.role == "admin" or user_data.role == "peneliti" %}
+                    <a href="{{ url_for('newproject') }}"
+                        class="dropdown-item {% if request.endpoint == 'newproject' %}active{% endif %}">Penelitian Baru</a>
+                    {% endif %}
+                    <a href="{{ url_for('myproject') }}"
+                        class="dropdown-item {% if request.endpoint == 'myproject' %}active{% endif %}">Penelitianku</a>
+                    <!-- Add the Project Details link here and hide it by default -->
+                    <a href="#"
+                        class="dropdown-item {% if request.endpoint == 'project_details' %}active{% endif %}" id="projectDetailsLink" style="display: none;">Project Details</a>
+                </div>
+            </div>
+            {% if user_data.role != "mahasiswa" %}
+            <div class="nav-item dropdown">
+                <a href="#"
+                    class="nav-link dropdown-toggle {% if request.endpoint in ['borrow_equipment_page', 'manage_borrow_requests', 'borrowed_equipment', 'manage_equipment'] %}active{% endif %}"
+                    data-bs-toggle="dropdown"><i class="fa fa-keyboard me-2"></i>Peminjaman</a>
+                <div class="dropdown-menu bg-transparent border-0">
+                    <a href="{{ url_for('borrow_equipment_page') }}"
+                        class="dropdown-item {% if request.endpoint == 'borrow_equipment_page' %}active{% endif %}">Peminjaman</a>
+                    {% if user_data.role == "admin peralatan" %}
+                    <a href="{{ url_for('manage_borrow_requests') }}"
+                        class="dropdown-item {% if request.endpoint == 'manage_borrow_requests' %}active{% endif %}">Kelola
+                        Permintaan</a>
+                    <a href="{{ url_for('manage_equipment') }}"
+                        class="dropdown-item {% if request.endpoint == 'manage_equipment' %}active{% endif %}">Manajemen
+                        Peralatan</a>
+                    {% endif %}
+                    <a href="{{ url_for('borrowed_equipment') }}"
+                        class="dropdown-item {% if request.endpoint == 'borrowed_equipment' %}active{% endif %}">Peralatan
+                        yang Dipinjam</a>
+                </div>
+            </div>
+            {% endif %}
+            <a href="{{ url_for('sample') }}"
+                class="nav-item nav-link {% if request.endpoint == 'sample' %}active{% endif %}"><i
+                    class="fa fa-table me-2"></i>Sample</a>
+            <a href="{{ url_for('statistik') }}"
+                class="nav-item nav-link {% if request.endpoint == 'statistik' %}active{% endif %}"><i
+                    class="fa fa-chart-bar me-2"></i>Statistik Lab</a>
+        </div>
+    </nav>
+</div>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
+        integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
+        integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF"
+        crossorigin="anonymous"></script>
+
+    <script src="{{ url_for('static', filename='myjs.js') }}"></script>
+    {% include 'link.html' %}
+    <link href="static/chat_style.css" rel="stylesheet">
+</head>
+<style>
+    .btn-secondary {
+        margin-bottom: 20px;
+    }
+
+    .btn-primary {
+        margin-bottom: 20px;
+    }
+
+    .row-border-light {
+        margin-top: 20px;
+    }
+</style>
+
+<body>
+    <div class="container-xxl position-relative bg-white d-flex p-0">
+        {% include 'sidebar.html' %}
+        <div class="content">
+            {% include 'navbar.html' %}
+            <div class="container light-style flex-grow-1 container-p-y">
+                <h4 class="font-weight-bold py-3 mb-4" style="text-align: center;">
+                    Informasi Akun
+                </h4>
+                <div class="card overflow-hidden">
+                    <div class="row no-gutters row-bordered row-border-light">
+                        <div class="col-md-2 pt-0">
+                        </div>
+                        <div class="col-md-9">
+                            <div class="tab-content">
+                                <div class="tab-pane fade active show" id="account-general">
+                                    <div class="media-body ml-4 d-flex align-items-center justify-content-center">
+                                        {% if user_data['photo'] %}
+                                        <div class="rounded-circle overflow-hidden d-flex justify-content-center align-items-center"
+                                            style="width: 230px; height: 230px; border: 5px solid #fff;">
+                                            <img class="w-100 h-100"
+                                                src="{{ url_for('static', filename=user_data['photo']) }}"
+                                                alt="User Photo">
+                                        </div>
+                                        {% else %}
+                                        <div class="rounded-circle overflow-hidden d-flex justify-content-center align-items-center"
+                                            style="width: 200px; height: 200px; border: 5px solid #fff;">
+                                            <img class="w-100 h-100"
+                                                src="{{ url_for('static', filename='profile_sementara.png') }}"
+                                                alt="Default Photo">
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <hr class="border-light m-0">
+                                    <div class="card-body">
+                                        <form method="post" action="{{ url_for('edit_profile') }}"
+                                            enctype="multipart/form-data">
+                                            <div class="form-group">
+                                                <strong class="form-label">Nama Lengkap</strong>
+                                                <p class="card-text">{{ user_data.name }}</p>
+                                            </div>
+                                            <hr>
+                                            <div class="form-group">
+                                                <strong class="form-label">Email</strong>
+                                                <p class="card-text">{{ user_data.email }}</p>
+                                            </div>
+                                            <hr>
+                                            <div class="form-group">
+                                                <strong class="form-label">Peran</strong>
+                                                <p class="card-text">{{ user_data.role }}</p>
+                                            </div>
+                                            <hr>
+                                            <div class="form-group">
+                                                <strong class="form-label">Deskripsi</strong>
+                                                <p class="card-text">{{ user_data.bio }}</p>
+                                            </div>
+                                            <hr>
+                                        </form>
+                                        <div class="text-right mt-3">
+                                            <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">Edit
+                                                Profile</a>
+                                            <a href="{{ url_for('home') }}" class="btn btn-secondary">Back</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button type="button" class="btn btn-primary rounded-circle position-fixed"
+        style="bottom: 20px; right: 20px; z-index: 100;" data-toggle="modal" data-target="#chatModal">
+        <i class="fas fa-comment-alt"></i> Chat
+    </button>
+    {% include 'footer.html' %}
+    {% include 'chat.html' %}
+    <script src="{{ url_for('static', filename='chat.js') }}"></script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="static/main.js"></script>
+</body>
+
+</html>

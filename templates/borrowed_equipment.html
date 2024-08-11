@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peralatan yang Dipinjam</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    {% include 'link.html' %}
+    <link href="static/chat_style.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container-xxl position-relative bg-white d-flex p-0">
+        {% include 'sidebar.html' %}
+        <div class="content">
+            {% include 'navbar.html' %}
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h4>Peralatan yang Dipinjam</h4>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Nama Peralatan</th>
+                                    <th>Jumlah</th>
+                                    <th>Tanggal Pinjam</th>
+                                    <th>Tanggal Kembali</th>
+                                    <th>Deadline</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for equipment in borrowed_equipment %}
+                                <tr>
+                                    <td>{{ equipment.equipment_name }}</td>
+                                    <td>{{ equipment.quantity }}</td>
+                                    <td>{{ equipment.borrow_date }}</td>
+                                    <td>{{ equipment.return_date }}</td>
+                                    <td>{{ equipment.deadline }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button type="button" class="btn btn-primary rounded-circle position-fixed"
+        style="bottom: 20px; right: 20px; z-index: 100;" data-toggle="modal" data-target="#chatModal">
+        <i class="fas fa-comment-alt"></i> Chat
+    </button>
+    {% include 'footer.html' %}
+
+    {% include 'chat.html' %}
+    <script src="{{ url_for('static', filename='chat.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="static/main.js"></script>
+</body>
+
+</html>

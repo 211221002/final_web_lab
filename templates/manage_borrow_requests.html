@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Permintaan Peminjaman</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    {% include 'link.html' %}
+    <link href="static/chat_style.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container-xxl position-relative bg-white d-flex p-0">
+        {% include 'sidebar.html' %}
+        <div class="content">
+            {% include 'navbar.html' %}
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        {% with messages = get_flashed_messages(with_categories=True) %}
+                        {% if messages %}
+                        <div class="alert alert-{{ messages[0][0] }}">
+                            {{ messages[0][1] }}
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+                    </div>
+                </div>
+
+                <!-- Manage Borrow Requests -->
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Kelola Permintaan Peminjaman</h4>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Nama Peminjam</th>
+                                            <th>Nama Peralatan</th>
+                                            <th>Jumlah</th>
+                                            <th>Tanggal Pinjam</th>
+                                            <th>Tanggal Kembali</th>
+                                            <th>Status</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for request in borrow_requests %}
+                                        <tr>
+                                            <td>{{ request.user_name }}</td>
+                                            <td>{{ request.equipment_name }}</td>
+                                            <td>{{ request.quantity }}</td>
+                                            <td>{{ request.borrow_date }}</td>
+                                            <td>{{ request.return_date }}</td>
+                                            <td>{{ request.status }}</td>
+                                            <td>
+                                                {% if request.status == 'pending' %}
+                                                <form
+                                                    action="{{ url_for('update_borrow_request', request_id=request._id) }}"
+                                                    method="POST" style="display:inline;">
+                                                    <input type="hidden" name="action" value="accept">
+                                                    <button type="submit" class="btn btn-success btn-sm">Terima</button>
+                                                </form>
+                                                <button type="button" class="btn btn-danger btn-sm" data-toggle="modal"
+                                                    data-target="#rejectModal"
+                                                    data-request-id="{{ request._id }}">Tolak</button>
+                                                {% endif %}
+                                                {% if request.status == 'accept' or request.status == 'reject' %}
+                                                <!-- Tidak menampilkan tombol jika status sudah 'accept' atau 'reject' -->
+                                                <!-- Anda juga bisa menambahkan pesan yang sesuai -->
+                                                <span class="text-muted">Permintaan Selesai</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Manage Borrow Requests -->
+
+
+
+                <!-- Reject Modal -->
+                <div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="rejectModalLabel">Alasan Penolakan</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <form id="rejectForm" method="POST">
+                                <div class="modal-body">
+                                    <input type="hidden" name="action" value="reject">
+                                    <div class="form-group">
+                                        <label for="reason">Alasan:</label>
+                                        <textarea class="form-control" id="reason" name="reason" rows="3"
+                                            required></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                                    <button type="submit" class="btn btn-danger">Tolak</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Reject Modal -->
+
+            </div>
+        </div>
+    </div>
+    <button type="button" class="btn btn-primary rounded-circle position-fixed"
+        style="bottom: 20px; right: 20px; z-index: 100;" data-toggle="modal" data-target="#chatModal">
+        <i class="fas fa-comment-alt"></i> Chat
+    </button>
+
+    {% include 'footer.html' %}
+
+    {% include 'chat.html' %}
+    <script src="{{ url_for('static', filename='chat.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="static/main.js"></script>
+
+    <script>
+        $('#rejectModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget)
+            var requestId = button.data('request-id')
+            var modal = $(this)
+            modal.find('form').attr('action', `/update_borrow_request/${requestId}`)
+        })
+    </script>
+</body>
+
+</html>

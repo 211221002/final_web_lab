@@ -1,0 +1,159 @@
+.notification-dropdown {
+    width: 300px; /* Adjust the width as needed */
+}
+.list-group-item {
+    padding: 10px 15px;
+    border: none;
+    border-bottom: 1px solid #e9ecef;
+}
+.list-group-item:last-child {
+    border-bottom: none;
+}
+.list-group-item i {
+    font-size: 1.2em;
+}
+.notification-dropdown {
+    width: 300px; /* Adjust the width as needed */
+    left: auto; /* Ensure it's not forced to the right */
+    right: 0; /* Align to the right edge of the parent */
+}
+
+
+.modal-content {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.modal-header {
+    background-color: #075E54;
+    color: white;
+}
+
+.chat-box {
+    height: 60vh;
+    overflow-y: auto;
+    background-color: #ECE5DD;
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+#chatMessages {
+    list-style-type: none;
+    padding: 0;
+}
+
+.list-group-item {
+    border: none;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    padding: 10px;
+    max-width: 75%;
+}
+
+.sent {
+    background-color: #DCF8C6;
+    align-self: flex-end;
+    margin-right: 10px;
+}
+
+.received {
+    background-color: white;
+    align-self: flex-start;
+    margin-left: 10px;
+}
+
+.input-group {
+    margin-top: 15px;
+}
+
+.input-group .form-control {
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+}
+
+.input-group .btn {
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+
+.input-group-append {
+    margin-left: -1px;
+}
+
+#sendMessageButton {
+    background-color: #075E54;
+    border: none;
+}
+
+#sendMessageButton:hover {
+    background-color: #128C7E;
+}
+
+.btn-chat i {
+    font-size: 1.2rem;
+    /* Ubah ukuran ikon */
+    color: white;
+    /* Ubah warna ikon */
+}
+
+/* Modal body styling */
+.chat-modal-body {
+    display: flex;
+    flex-direction: column;
+    max-height: 500px; /* Adjust height as needed */
+    overflow-y: auto;
+}
+
+/* Ensure chat-box grows to fill space */
+.chat-box {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* Style for the input-group wrapper */
+.input-group-wrapper {
+    margin-top: auto;
+}
+
+/* Horizontal layout for file upload */
+.file-upload-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+/* Ensure file input and button are aligned */
+.file-upload-wrapper .form-group {
+    margin-bottom: 0;
+}
+
+/* Margin between file input and button */
+.file-upload-wrapper .form-group.mb-0 {
+    margin-right: 10px;
+}
+
+/* Style for the modal body */
+.modal-body {
+    padding: 20px; /* Add some padding around the content */
+}
+
+/* Style for the list group */
+.chat-item {
+    list-style-type: none; /* Remove default list styling */
+    padding: 0; /* Remove default padding */
+    margin: 0; /* Remove default margin */
+}
+
+.chat-item li {
+    background-color: #f8f9fa; /* Light background color for list items */
+    border: 1px solid #dee2e6; /* Border around each list item */
+    border-radius: 5px; /* Rounded corners */
+    padding: 10px; /* Padding inside each list item */
+    margin-bottom: 10px; /* Space between list items */
+    transition: background-color 0.3s; /* Smooth transition for hover effect */
+}
+
+.chat-item li:hover {
+    background-color: #e9ecef; /* Slightly darker background on hover */
+}
